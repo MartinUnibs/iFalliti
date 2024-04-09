@@ -6,7 +6,7 @@ import java.util.List;
 import it.kibo.fp.lib.RandomDraws;
 
 public class Celestial {
-	
+
 	private String uid;
 	private int mass;
 	private int posX;
@@ -24,7 +24,7 @@ public class Celestial {
 		this.parent = parent;
 		this.children = new ArrayList<>();
 	}
-	
+
 	public String getUid() {
 		return uid;
 	}
@@ -32,23 +32,23 @@ public class Celestial {
 	public int getMass() {
 		return mass;
 	}
-	
+
 	public int getPosX() {
 		return posX;
 	}
-	
+
 	public int getPosY() {
 		return posY;
 	}
-	
+
 	public double getDistance() {
 		return distance;
 	}
-	
+
 	public Celestial getParent() {
 		return parent;
 	}
-	
+
 	public List<Celestial> getChildren() {
 		return children;
 	}
@@ -56,11 +56,11 @@ public class Celestial {
 	public void addChild(Celestial child) {
 		children.add(child);
 	}
-	
+
 	public void removeChild(Celestial child) {
 		children.remove(child);
 	}
-	
+
 	private String createUid(String name, int mass, int posX, int posY, Celestial reference) {
 		StringBuilder uid = new StringBuilder();
 		// SECTION 1: header
@@ -93,7 +93,7 @@ public class Celestial {
 		uid.append(String.format("%02d", rand));
 		return uid.toString();
 	}
-	
+
 	private String getStringMeasures(int[] measures) {
 		StringBuilder builder = new StringBuilder();
 		for (int measure : measures) {
@@ -103,12 +103,12 @@ public class Celestial {
 		}
 		return builder.toString();
 	}
-	
+
 	@Override
 	public String toString() {
 		return "Corpo Celeste - " + uid;
 	}
-	
+
 	public boolean equals(Celestial c) {
 		if (c == null) return false;
 		return this.uid.equals(c.getUid());

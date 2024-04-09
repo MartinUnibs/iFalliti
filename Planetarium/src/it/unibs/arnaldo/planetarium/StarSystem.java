@@ -1,10 +1,11 @@
 package it.unibs.arnaldo.planetarium;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class StarSystem {
-	
+
 	private String name;
 	private Celestial star;
 	private double massCenterX;
@@ -14,8 +15,8 @@ public class StarSystem {
 	private static final String ADDPLANET_ERROR = "Impossibile aggiungere il pianeta! Limite fisico raggiunto!";
 	private static final String ADDMOON_ERROR = "Impossibile aggiungere la luna! Limite fisico raggiunto!";
 	private static final String SUCCESS = "Creazione avvenuta con successo!";
-	private final double EPSILON = 0.0001; 
-	
+	private static final double EPSILON = 0.0001;
+
 	public StarSystem(String name, Celestial star) {
 		this.name = name;
 		this.star = star;
@@ -26,17 +27,29 @@ public class StarSystem {
 	public String getName() {
 		return name;
 	}
-	
+
 	public Celestial getStar() {
 		return star;
 	}
-	
+
 	public double getMassCenterX() {
 		return massCenterX;
 	}
-	
+
 	public double getMassCenterY() {
 		return massCenterY;
+	}
+
+	public List<Celestial> getPlanets() {
+		return star.getChildren();
+	}
+
+	public List<Celestial> getMoons() {
+		List<Celestial> moons = new ArrayList<>();
+		for (Celestial planet : star.getChildren()) {
+			moons.addAll(planet.getChildren());
+		}
+		return moons;
 	}
 
 	public String addPlanet(int mass, int posX, int posY) {
@@ -50,7 +63,7 @@ public class StarSystem {
 		}
 		return outcome;
 	}
-	
+
 	public String addMoon(int mass, int posX, int posY, Celestial planet) {
 		String outcome = "";
 		if (planet.getChildren().size() >= MOON_LIMIT) {
@@ -62,45 +75,40 @@ public class StarSystem {
 		}
 		return outcome;
 	}
-	
+
 	// eliminare un pianeta elimina anche tutte le sue lune
 	public void deletePlanet(Celestial toDelete) {
 		star.removeChild(toDelete);
 	}
-	
+
 	public void deleteMoon(Celestial toDelete) {
 		Celestial parent = toDelete.getParent();
 		parent.removeChild(toDelete);
 	}
-	
+
 	public boolean contains(String uid) {
 		return findCelestial(uid) != null;
 	}
-	
+
 	public Celestial getReferencePlanet(Celestial moon) {
 		return moon.getParent();
 	}
-	
+
 	public List<Celestial> getOrbitatingMoons(Celestial planet) {
 		return planet.getChildren();
 	}
-	
-	public List<Celestial> getPath(Celestial celestial) { //TODO: fix
+
+	public List<Celestial> getPath(Celestial celestial) {
 		List<Celestial> path = new ArrayList<>();
-		path.add(star);
-		if (celestial.getParent() == null) {
-			// STELLA
-		} else {
-			if (!celestial.getParent().equals(star)) {
-				// LUNA
-				path.add(celestial.getParent());
-			}
+		while (celestial != null) {
 			path.add(celestial);
+			celestial = celestial.getParent();
 		}
+		Collections.reverse(path);
 		return path;
 	}
-	
-	public double[] calculateMassCenter() {
+
+	public void calculateMassCenter() { //TODO: recursion ??
 		// STELLA
 		int massSum = star.getMass();
 		int xSum = star.getPosX() * star.getMass();
@@ -121,18 +129,14 @@ public class StarSystem {
 				ySum += pos[1] * moon.getMass();
 			}
 		}
-		double[] mc = new double[2];
 		massCenterX = (double)xSum / massSum;
 		massCenterY = (double)ySum / massSum;
-		mc[0] = massCenterX;
-		mc[1] = massCenterY;
-		return mc;
 	}
-	
+
 	public Route getRoute(Celestial c1, Celestial c2) {
 		return new Route(this, c1, c2);
 	}
-	
+
 	public boolean possibleCollisions() {
 		List<Celestial> leaves = getLeaves();
 		for (int i = 0; i < leaves.size(); i++) {
@@ -146,15 +150,15 @@ public class StarSystem {
 					int[] refP2 = getAbsolutePos(c2.getParent());
 					double refDistance = Math.sqrt(
 							Math.pow((double)refP1[0] - refP2[0], 2) +
-							Math.pow((double)refP1[1] - refP2[1], 2)
-							);
+									Math.pow((double)refP1[1] - refP2[1], 2)
+					);
 					if (c1.getDistance() + c2.getDistance() >= refDistance) return true;
 				}
 			}
 		}
 		return false;
 	}
-	
+
 	private Celestial findCelestial(String uid) {
 		if (star.getUid().equals(uid)) return star;
 		List<Celestial> planets = star.getChildren();
@@ -171,30 +175,22 @@ public class StarSystem {
 		}
 		return null;
 	}
-	
-	private int[] getAbsolutePos(Celestial celestial) { //TODO: fix
+
+	private int[] getAbsolutePos(Celestial celestial) {
 		int[] pos = new int[2];
 		if (celestial == null) {
 			pos[0] = 0;
 			pos[1] = 0;
-			return pos;
-		}
-		pos[0] = star.getPosX();
-		pos[1] = star.getPosY();
-		if (celestial.getParent() == null) {
-			// STELLA
 		} else {
-			if (!celestial.getParent().equals(star)) {
-				// LUNA
-				pos[0] += celestial.getParent().getPosX();
-				pos[1] += celestial.getParent().getPosY();
+			while (celestial != null) {
+				pos[0] += celestial.getPosX();
+				pos[1] += celestial.getPosY();
+				celestial = celestial.getParent();
 			}
-			pos[0] += celestial.getPosX();
-			pos[1] += celestial.getPosY();
 		}
 		return pos;
 	}
-	
+
 	private List<Celestial> getLeaves() {
 		List<Celestial> leaves = new ArrayList<>();
 		List<Celestial> planets = star.getChildren();
@@ -210,7 +206,7 @@ public class StarSystem {
 		leaves.add(star);
 		return leaves;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "Sistema Stellare - " + name;

@@ -4,10 +4,10 @@ import java.util.Collections;
 import java.util.List;
 
 public class Route {
-	
+
 	private List<Celestial> lane;
 	private double travelDistance;
-	
+
 	public Route(StarSystem starSystem, Celestial c1, Celestial c2) {
 		List<Celestial> p1 = starSystem.getPath(c1);
 		List<Celestial> p2 = starSystem.getPath(c2);
@@ -32,11 +32,11 @@ public class Route {
 	public List<Celestial> getLane() {
 		return lane;
 	}
-	
+
 	public double getTravelDistance() {
 		return travelDistance;
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -47,5 +47,5 @@ public class Route {
 		builder.delete(builder.length() - 3, builder.length());
 		return builder.toString();
 	}
-	
+
 }
